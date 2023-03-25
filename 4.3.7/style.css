@@ -3,6 +3,11 @@ body{
     margin: 0 auto;
 }
 
+.error{
+    color: red;
+    font-size: 14px;
+}
+
 .search{
     margin-top: 50px;
     margin-bottom: 50px;
