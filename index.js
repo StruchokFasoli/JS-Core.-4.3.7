@@ -33,6 +33,7 @@ function debounce(fn, debounceTime){
 };
 // функция отправуи запроса на сервер 
 function serverUp(name){
+    // если ввели "пробел" - пробрасывать ошибку
     if(name[0] === ' '){
         return new Promise((resolve, reject) => {
             reject(new Error('Имя репозитория не может начинаться со знака "Пробел"'))
@@ -80,7 +81,7 @@ input.addEventListener('keyup', debounce(text =>{
             dropdownCard(repos)
         }
     })
-    .catch(er => {
+    .catch(er => { //вывод ошибки ввода
         dropdown.innerHTML = '';
         let error = document.createElement('p');
         error.classList.add('error')
