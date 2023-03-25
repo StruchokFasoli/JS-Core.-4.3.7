@@ -2,9 +2,6 @@ let input = document.querySelector('input');
 let dropdown = document.querySelector('.dropdown');
 
 let basket = document.querySelector('.basket');
-// let cardRepo = basket.querySelector('.card_repo');
-// let repo_info = cardRepo.querySelector('.repo_info');
-// let close = cardRepo.querySelector('.close');
 
 
 // создание карточки выбранного репозитория 
@@ -26,7 +23,7 @@ function choisRepo(repo){
     })
 }
 // функция задержка ввода
-const debounce = (fn, debounceTime) => {
+function debounce(fn, debounceTime){
     let timer;
     return function(){
         let cb = () => {fn.apply(this,arguments)}
@@ -36,6 +33,11 @@ const debounce = (fn, debounceTime) => {
 };
 // функция отправуи запроса на сервер 
 function serverUp(name){
+    if(name[0] === ' '){
+        return new Promise((resolve, reject) => {
+            reject(new Error('Имя репозитория не может начинаться со знака "Пробел"'))
+        })
+    }
     // если очистили строку
     if(!name) {
         return new Promise((resolve, reject) => {
@@ -50,7 +52,24 @@ function serverUp(name){
             return arr = [...repos.items]
         })
 }
-
+ // добавление карточек в разметку
+function dropdownCard(repos){
+    dropdown.innerHTML = '';
+    let fragment = document.createDocumentFragment();        
+    repos.forEach(repo =>{
+        let cardName = document.createElement('div');
+        cardName.classList.add('card_name');
+        cardName.textContent = repo.name
+        // выбор репозитория
+        cardName.addEventListener('click', ()=>{
+            input.value = '';
+            dropdown.innerHTML = '';
+            choisRepo(repo)
+        })
+        fragment.appendChild(cardName)
+    })
+        dropdown.appendChild(fragment)
+}
 // слушатель отправки запроса
 input.addEventListener('keyup', debounce(text =>{
     serverUp(text.target.value)
@@ -58,20 +77,14 @@ input.addEventListener('keyup', debounce(text =>{
         if(repos.length === 0) { //пустой ответ - очистка
             dropdown.innerHTML = '';
         } else { // создание карточек поиска
-            let fragment = document.createDocumentFragment();        
-            repos.forEach(repo =>{
-                dropdown.innerHTML = '';
-                let cardName = document.createElement('div');
-                cardName.classList.add('card_name');
-                cardName.textContent = repo.name
-                // выбор репозитория
-                cardName.addEventListener('click', ()=>{
-                    input.value = '';
-                    choisRepo(repo)
-                })
-                fragment.appendChild(cardName)
-            })
-        dropdown.appendChild(fragment) // добавление карточек в разметку
+            dropdownCard(repos)
         }
+    })
+    .catch(er => {
+        dropdown.innerHTML = '';
+        let error = document.createElement('p');
+        error.classList.add('error')
+        error.textContent = er
+        dropdown.appendChild(error)
     })
 },400))
